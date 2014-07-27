@@ -23,13 +23,13 @@ public class MonitoringInterceptor {
         Monitored monitored = ctx.getMethod().getAnnotation(Monitored.class);
         
         Logger logger = findLogger(monitored.layer());
-        logger.info("UseCase: [{}] Thread: [{}] Method: [{}] Args: [{}]", monitored.useCase(), thread, getFullMethodName(ctx), getParameters(ctx));
+        logger.debug("UseCase: [{}] Thread: [{}] Method: [{}] Args: [{}]", monitored.useCase(), thread, getFullMethodName(ctx), getParameters(ctx));
         
         long startTime = System.nanoTime();
         Object result = ctx.proceed();
         long executionTimeMs = (System.nanoTime() - startTime)/1000;
 
-        logger.info("UseCase: [{}] Thread: [{}] Method: [{}] Took: [{} ms] Returned: [{}]", monitored.useCase(), thread, getFullMethodName(ctx), executionTimeMs, result);
+        logger.debug("UseCase: [{}] Thread: [{}] Method: [{}] Took: [{} ms] Returned: [{}]", monitored.useCase(), thread, getFullMethodName(ctx), executionTimeMs, result);
         
         return result;
     }
