@@ -10,7 +10,7 @@ On top of this, the execution time for a method invocation is measured and logge
 Osiris uses [slf4j](http://slf4j.org) to log method invocations. You need to make sure that your project uses `slf4j` API for logging to your desired logging framework.
 
 ## Usage ##
-The usage is fairly easy, just drop the library as a dependency into your project and annotate the methods you which to monitor.
+The usage is fairly easy, just drop the library as a dependency into your project and annotate the methods you wish to monitor.
 
 __NOTE:__ Please note that monitoring only works for CDI managed beans and public methods.
 
