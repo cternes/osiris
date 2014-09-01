@@ -2,11 +2,17 @@ package de.slackspace.osiris.diagnosis;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.annotation.Priority;
+import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
+
 import static javax.interceptor.Interceptor.Priority.LIBRARY_BEFORE;
+
 import javax.interceptor.InvocationContext;
+import javax.ws.rs.core.Response;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,41 +23,37 @@ public class MonitoringInterceptor {
     
     private final Map<String, Logger> loggers = new HashMap<>();
     
+    @Inject
+    InvocationContextParser ctxParser;
+    
+    @Inject 
+    ResultConverter resultConverter;
+    
     @AroundInvoke
     public Object logInvocation(InvocationContext ctx) throws Exception {
         String thread = Thread.currentThread().getName();
         Monitored monitored = ctx.getMethod().getAnnotation(Monitored.class);
-        
         Logger logger = findLogger(monitored.layer());
-        logger.debug("UseCase: [{}] Thread: [{}] Method: [{}] Args: [{}]", monitored.useCase(), thread, getFullMethodName(ctx), getParameters(ctx));
+        
+        logBeforeProceed(logger, monitored.useCase(), thread, ctx);
         
         long startTime = System.nanoTime();
         Object result = ctx.proceed();
-        long executionTimeMs = (System.nanoTime() - startTime)/1000;
+        long executionTimeMs = (System.nanoTime() - startTime) / 1000000;
 
-        logger.debug("UseCase: [{}] Thread: [{}] Method: [{}] Took: [{} ms] Returned: [{}]", monitored.useCase(), thread, getFullMethodName(ctx), executionTimeMs, result);
+        logAfterProceed(logger, monitored.useCase(), thread, ctx, executionTimeMs, result);
         
         return result;
     }
     
-    private String getFullMethodName(InvocationContext ctx) {
-        String clazzName = ctx.getMethod().getDeclaringClass().getName();
-        String methodName = ctx.getMethod().getName();
-        
-        return String.format("%s:%s", clazzName, methodName);
+    private void logBeforeProceed(Logger logger, String useCase, String thread, InvocationContext ctx) {
+    	logger.debug("UseCase: [{}] Thread: [{}] Method: [{}] Args: [{}]", useCase, thread, ctxParser.getFullMethodName(ctx), ctxParser.getParameters(ctx));
     }
     
-    private String getParameters(InvocationContext ctx) {
-        StringBuilder sb = new StringBuilder();
-        
-        for (int i = 0; i < ctx.getParameters().length; i++) {
-            if(i > 0) {
-                sb.append(", ");
-            }
-            sb.append(ctx.getParameters()[i].toString());
-        }
-        
-        return sb.toString();
+    private void logAfterProceed(Logger logger, String useCase, String thread, InvocationContext ctx, long executionTimeMs, Object result) {
+    	String resultString = resultConverter.convertToString(result);
+    	
+    	logger.debug("UseCase: [{}] Thread: [{}] Method: [{}] Took: [{} ms] Returned: [{}]", useCase, thread, ctxParser.getFullMethodName(ctx), executionTimeMs, resultString);
     }
     
     private Logger findLogger(String layer) {
