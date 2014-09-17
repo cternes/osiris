@@ -9,7 +9,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class InvocationContextParserTests {
+public class InvocationContextParserTest {
 
 	private InvocationContextParser cut = new InvocationContextParser();
 
@@ -19,7 +19,7 @@ public class InvocationContextParserTests {
 		Method testMethod = this.getClass().getMethod("whenGetFullMethodNameIsCalledFromClazzThenReturnThatClassWithMethodNameAsString");
 		Mockito.when(mockContext.getMethod()).thenReturn(testMethod);
 		
-		Assert.assertEquals("de.slackspace.osiris.diagnosis.InvocationContextParserTests:whenGetFullMethodNameIsCalledFromClazzThenReturnThatClassWithMethodNameAsString", cut.getFullMethodName(mockContext));
+		Assert.assertEquals("de.slackspace.osiris.diagnosis.InvocationContextParserTest:whenGetFullMethodNameIsCalledFromClazzThenReturnThatClassWithMethodNameAsString", cut.getFullMethodName(mockContext));
 	}
 	
 	@Test

@@ -10,7 +10,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-public class ResultConverterTests {
+public class ResultConverterTest {
 
 	private ResultConverter cut = new ResultConverter();
 	
