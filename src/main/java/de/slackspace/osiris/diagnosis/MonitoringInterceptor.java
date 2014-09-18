@@ -1,20 +1,21 @@
 package de.slackspace.osiris.diagnosis;
 
+import static javax.interceptor.Interceptor.Priority.LIBRARY_BEFORE;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
-
-import static javax.interceptor.Interceptor.Priority.LIBRARY_BEFORE;
-
 import javax.interceptor.InvocationContext;
-import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import de.slackspace.osiris.diagnosis.context.ThreadLocalContextHolder;
 
 @Monitored
 @Interceptor
@@ -33,27 +34,35 @@ public class MonitoringInterceptor {
     public Object logInvocation(InvocationContext ctx) throws Exception {
         String thread = Thread.currentThread().getName();
         Monitored monitored = ctx.getMethod().getAnnotation(Monitored.class);
+        createTransactionIdIfNecessary(monitored.isRequestEntry());
         Logger logger = findLogger(monitored.layer());
         
-        logBeforeProceed(logger, monitored.useCase(), thread, ctx);
+        String transactionId = ThreadLocalContextHolder.getTransactionId();
+        logBeforeProceed(logger, monitored.useCase(), thread, ctx, transactionId);
         
         long startTime = System.nanoTime();
         Object result = ctx.proceed();
         long executionTimeMs = (System.nanoTime() - startTime) / 1000000;
 
-        logAfterProceed(logger, monitored.useCase(), thread, ctx, executionTimeMs, result);
+        logAfterProceed(logger, monitored.useCase(), thread, ctx, executionTimeMs, result, transactionId);
         
         return result;
     }
+
+	private void createTransactionIdIfNecessary(boolean isRequestEntry) {
+		if(isRequestEntry) {
+			ThreadLocalContextHolder.putTransactionId(UUID.randomUUID().toString());
+		}
+	}
     
-    private void logBeforeProceed(Logger logger, String useCase, String thread, InvocationContext ctx) {
-    	logger.debug("UseCase: [{}] Thread: [{}] Method: [{}] Args: [{}]", useCase, thread, ctxParser.getFullMethodName(ctx), ctxParser.getParameters(ctx));
+    private void logBeforeProceed(Logger logger, String useCase, String thread, InvocationContext ctx, String transactionId) {
+    	logger.debug("TransactionId: [{}] UseCase: [{}] Thread: [{}] Method: [{}] Args: [{}]", transactionId, useCase, thread, ctxParser.getFullMethodName(ctx), ctxParser.getParameters(ctx));
     }
     
-    private void logAfterProceed(Logger logger, String useCase, String thread, InvocationContext ctx, long executionTimeMs, Object result) {
+    private void logAfterProceed(Logger logger, String useCase, String thread, InvocationContext ctx, long executionTimeMs, Object result, String transactionId) {
     	String resultString = resultConverter.convertToString(result);
     	
-    	logger.debug("UseCase: [{}] Thread: [{}] Method: [{}] Took: [{} ms] Returned: [{}]", useCase, thread, ctxParser.getFullMethodName(ctx), executionTimeMs, resultString);
+    	logger.debug("TransactionId: [{}] UseCase: [{}] Thread: [{}] Method: [{}] Took: [{} ms] Returned: [{}]", transactionId, useCase, thread, ctxParser.getFullMethodName(ctx), executionTimeMs, resultString);
     }
     
     private Logger findLogger(String layer) {

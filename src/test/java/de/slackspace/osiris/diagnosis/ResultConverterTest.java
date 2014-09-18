@@ -1,9 +1,6 @@
 package de.slackspace.osiris.diagnosis;
 
 import javax.json.Json;
-import javax.json.JsonBuilderFactory;
-import javax.json.JsonObjectBuilder;
-import javax.json.stream.JsonGenerator;
 import javax.ws.rs.core.Response;
 
 import junit.framework.Assert;

@@ -39,4 +39,14 @@ public @interface Monitored {
      */
     @Nonbinding
     public String useCase() default "N/A";
+    
+    /**
+     * Specifies if request tracing should be started. Every request will be uniquely tagged, 
+     * so that you can trace the request through the application. 
+     * 
+     * This usually only makes sense at your application boundary (REST-Endpoint, Servlet, API-Endpoint ...).
+     * 
+     */
+    @Nonbinding
+    public boolean isRequestEntry() default false;
 }
