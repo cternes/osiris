@@ -12,7 +12,13 @@ public class InvocationContextParser {
                 if(i > 0) {
                     sb.append(", ");
                 }
-                sb.append(ctx.getParameters()[i].toString());
+                
+                if(ctx.getParameters()[i] != null) {
+                	sb.append(ctx.getParameters()[i].toString());
+                }
+                else {
+                	sb.append("null");
+                }
             }
         }
         

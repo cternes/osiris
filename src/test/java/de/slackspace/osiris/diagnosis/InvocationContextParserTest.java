@@ -46,5 +46,13 @@ public class InvocationContextParserTest {
 		
 		Assert.assertEquals("name, 1000, true", cut.getParameters(mockContext));
 	}
+	
+	@Test
+	public void whenParameterIsNullThenNullParametersAsCommaSeperatedString() throws NoSuchMethodException, SecurityException {
+		InvocationContext mockContext = Mockito.mock(InvocationContext.class);
+		Mockito.when(mockContext.getParameters()).thenReturn(new Object[] {"name", null, true});
+		
+		Assert.assertEquals("name, null, true", cut.getParameters(mockContext));
+	}
 
 }
