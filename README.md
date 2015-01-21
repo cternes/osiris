@@ -6,8 +6,19 @@ A JavaEE 7 CDI interceptor which provides monitoring capabilities for called met
 It provides an easy way to log what arguments were passed into a method and what was returned by the method.
 On top of this, the execution time for a method invocation is measured and logged.
 
+## Installation ##
+
+The easiest way is to add osisis as a maven dependency. 
+
+	<dependency>
+   	 	<groupId>de.slackspace</groupId>
+    	<artifactId>osiris</artifactId>
+    	<version>1.0.1</version>
+	</dependency>
+
 ## Requirements ##
 Osiris uses [slf4j](http://slf4j.org) to log method invocations. You need to make sure that your project uses `slf4j` API for logging to your desired logging framework.
+Only Java versions > 1.7 are supported.
 
 ## Usage ##
 The usage is fairly easy, just drop the library as a dependency into your project and annotate the methods you wish to monitor.
